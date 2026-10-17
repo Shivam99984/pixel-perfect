@@ -8,3 +8,10 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture rules
+- Analysis engine lives in `src/features/analysis/` (contracts, provider server fn, scoring, report builder) and stays independent of UI — so providers or calibrated scoring can be swapped without touching report screens.
+- Provider output is always validated with zod (`providerOutputSchema`) before scoring or display; never show unvalidated or fabricated results.
+- Scoring is deterministic and versioned (`SCORING_VERSION`); bump the version when weights/thresholds change so comparisons can flag mismatched methods.
+- Demo data is a hand-written fixture flagged `demo: true` and always rendered with the DEMO banner; never fall back to it on a failed live analysis.
+- Reports currently persist in browser localStorage (`report-store.ts`) until accounts/Cloud storage are added.
