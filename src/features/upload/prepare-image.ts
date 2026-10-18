@@ -1,4 +1,5 @@
 import { sniffImageType, validateDimensions, validateFileMeta, type SupportedMime } from "@/features/analysis/image-signature";
+import { measureImage, type ImageQuality } from "@/features/analysis/image-quality";
 
 export interface PreparedImage {
   file: File;
