@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, FlaskConical } from "lucide-react";
+import { ChevronDown, Copy, FlaskConical } from "lucide-react";
+import { toast } from "sonner";
+import { buildFindingPrompt } from "@/features/improvements/build-prompt";
+import { QualityPanel } from "./quality-panel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ANALYSIS_GOALS, DIMENSION_LABELS, type CharacterAnalysisResult } from "@/features/analysis/contracts";
@@ -67,6 +70,8 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
             </p>
           </section>
 
+          {report.quality && <QualityPanel q={report.quality} />}
+
           <section aria-labelledby="dims-h">
             <h2 id="dims-h" className="eyebrow mb-3">Dimensions</h2>
             <div className="grid gap-2">
@@ -110,7 +115,7 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
                         </div>
                         <p className="text-sm text-muted-foreground">{f.evidence}</p>
                         <p className="text-sm"><span className="text-primary">Fix → </span>{f.correction}</p>
-                        <Collapsible>
+                        <Collapsible className="inline">
                           <CollapsibleTrigger className="text-xs text-muted-foreground underline-offset-2 hover:underline">Why & how</CollapsibleTrigger>
                           <CollapsibleContent className="mt-2 space-y-1 text-xs text-muted-foreground">
                             <p><b className="text-foreground/80">Why it looks artificial:</b> {f.why_artificial}</p>
@@ -118,6 +123,9 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
                             <p><b className="text-foreground/80">Approach:</b> {f.editing_approach}</p>
                           </CollapsibleContent>
                         </Collapsible>
+                        <button type="button" className="ml-3 inline-flex items-center gap-1 text-xs text-primary underline-offset-2 hover:underline" onClick={() => { void navigator.clipboard.writeText(buildFindingPrompt(f, report.preserve)).then(() => toast.success("Fix prompt copied"), () => toast.error("Could not copy")); }}>
+                          <Copy className="size-3" /> Copy fix prompt
+                        </button>
                       </div>
                     </div>
                   </li>
