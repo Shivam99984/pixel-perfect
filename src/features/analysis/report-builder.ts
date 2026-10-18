@@ -13,6 +13,7 @@ export function buildReport(args: {
   promptVersion: string;
   image: CharacterAnalysisResult["image"];
   output: ProviderOutput;
+  quality?: CharacterAnalysisResult["quality"];
 }): CharacterAnalysisResult {
   const { output } = args;
   const { score, dimensions } = scoreAnalysis(output.dimensions, output.resolution_quality);
@@ -43,5 +44,6 @@ export function buildReport(args: {
     findings,
     preserve: output.preserve_traits,
     score,
+    quality: args.quality ?? null,
   };
 }

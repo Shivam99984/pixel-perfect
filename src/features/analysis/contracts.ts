@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ImageQuality } from "./image-quality";
 
 export const DIMENSION_KEYS = ["skin", "eyes", "mouth", "hair", "anatomy", "lighting", "coherence"] as const;
 export type DimensionKey = (typeof DIMENSION_KEYS)[number];
@@ -101,6 +102,7 @@ export interface CharacterAnalysisResult {
   findings: VisualFinding[];
   preserve: PreserveTraits;
   score: RealismScore;
+  quality?: ImageQuality | null;
 }
 
 export type AnalysisErrorCode =
