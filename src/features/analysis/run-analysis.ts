@@ -27,5 +27,6 @@ export async function runAnalysis(img: PreparedImage, goal: AnalysisGoal, label:
     promptVersion: res.promptVersion,
     image: { displayUrl: img.displayDataUrl, width: img.width, height: img.height, filename: img.file.name, mime: img.mime, size: img.file.size },
     output: res.output,
+    quality: img.quality,
   });
 }

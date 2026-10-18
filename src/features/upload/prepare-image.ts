@@ -1,4 +1,5 @@
 import { sniffImageType, validateDimensions, validateFileMeta, type SupportedMime } from "@/features/analysis/image-signature";
+import { measureImage, type ImageQuality } from "@/features/analysis/image-quality";
 
 export interface PreparedImage {
   file: File;
@@ -8,6 +9,7 @@ export interface PreparedImage {
   originalUrl: string; // object URL of the untouched original
   analysisDataUrl: string; // derived copy (max 1600px JPEG) sent for analysis
   displayDataUrl: string; // derived copy (max 1024px) kept with the saved report
+  quality: ImageQuality | null;
 }
 
 export class ImageValidationError extends Error {}
@@ -48,6 +50,7 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
       originalUrl,
       analysisDataUrl: derive(img, 1600, 0.92),
       displayDataUrl: derive(img, 1024, 0.85),
+      quality: (() => { try { return measureImage(img); } catch { return null; } })(),
     };
   } catch (e) {
     URL.revokeObjectURL(originalUrl);

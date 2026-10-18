@@ -56,3 +56,20 @@ export function buildImprovementPrompt(opts: {
   if (tool === "flux") lines.push("", "Tip: phrase as an edit instruction and keep the reference image attached.");
   return lines.join("\n");
 }
+
+/** Single-issue prompt: fix one finding, keep the character identical. */
+export function buildFindingPrompt(f: VisualFinding, preserve: PreserveTraits): string {
+  const keep = PRESERVE_KEYS.filter((p) => preserve[p.key] && !/^not visible$/i.test(preserve[p.key]))
+    .map((p) => `- ${p.label}: ${preserve[p.key]}`)
+    .join("\n");
+  return [
+    `Edit only this issue in the image to improve photographic realism: ${f.title}.`,
+    `Fix: ${f.correction}`,
+    f.what_to_preserve ? `Preserve in this area: ${f.what_to_preserve}` : "",
+    "",
+    "Keep everything else identical, including:",
+    keep || "- The character's identity and overall composition",
+    "",
+    "Result should read as an unretouched photograph from the same camera and lighting.",
+  ].filter((l, i, a) => l !== "" || a[i - 1] !== "").join("\n");
+}
