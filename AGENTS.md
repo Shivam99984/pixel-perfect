@@ -15,3 +15,4 @@
 - Scoring is deterministic and versioned (`SCORING_VERSION`); bump the version when weights/thresholds change so comparisons can flag mismatched methods.
 - Demo data is a hand-written fixture flagged `demo: true` and always rendered with the DEMO banner; never fall back to it on a failed live analysis.
 - Reports currently persist in browser localStorage (`report-store.ts`) until accounts/Cloud storage are added.
+- Issue markers come from browser-side MediaPipe landmarks (`src/features/localization/`), never from AI-guessed coordinates; a finding is marked only when its region resolves to exactly one detected face/body, otherwise it stays text-only.

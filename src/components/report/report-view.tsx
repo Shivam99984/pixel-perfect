@@ -8,7 +8,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ANALYSIS_GOALS, DIMENSION_LABELS, type CharacterAnalysisResult } from "@/features/analysis/contracts";
 import { getDone, setDone } from "@/features/analysis/report-store";
 import { cn } from "@/lib/utils";
-import { ImageViewer } from "./image-viewer";
+import { ImageViewer, type ImageMarker } from "./image-viewer";
+import { useFindingBoxes } from "@/features/localization/use-finding-boxes";
 import { ImprovementCoach } from "./improvement-coach";
 import { EvidenceBadge, Meter, ScoreRing, SeverityBadge, scoreTone } from "./score-bits";
 
@@ -30,6 +31,11 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
     setDoneState(n);
     if (!report.demo) setDone(report.id, n);
   };
+  const loc = useFindingBoxes(report.image.displayUrl, report.findings);
+  const [active, setActive] = useState<string | null>(null);
+  const markers: ImageMarker[] = report.findings.flatMap((f, i) => { const box = loc.boxes.get(f.id); return box ? [{ id: f.id, n: i + 1, box, label: f.title }] : []; });
+  const markerNo = new Map(markers.map((m) => [m.id, m.n]));
+  const focusFinding = (id: string) => { setActive(id); document.getElementById(`finding-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }); };
   const ranked = [...score.breakdown].sort((a, b) => b.score - a.score);
 
   return (
@@ -40,7 +46,10 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
       )}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className="lg:sticky lg:top-20 lg:self-start">
-          <ImageViewer src={report.image.displayUrl} alt={`Character: ${report.label}`} filename={report.demo ? undefined : `${report.label}.jpg`} />
+          <ImageViewer src={report.image.displayUrl} alt={`Character: ${report.label}`} filename={report.demo ? undefined : `${report.label}.jpg`} markers={markers} activeId={active} onMarker={focusFinding} />
+          <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">
+            {loc.status === "loading" ? "Finding face and body points to mark issues…" : loc.status === "failed" ? "Couldn’t detect face or body points — issues are described in words." : report.findings.length ? `${markers.length} of ${report.findings.length} issues marked on the image; the rest are described in words because their location isn’t reliable.` : null}
+          </p>
           <p className="mt-2 text-xs text-muted-foreground">Display copy shown. Original: {report.image.width}×{report.image.height}px · {report.image.mime.replace("image/", "").toUpperCase()}</p>
         </div>
 
@@ -104,13 +113,16 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
             ) : (
               <ol className="grid gap-2">
                 {report.findings.map((f) => (
-                  <li key={f.id} className={cn("panel p-4 transition-opacity", done.has(f.id) && "opacity-60")}>
+                  <li key={f.id} id={`finding-${f.id}`} className={cn("panel p-4 transition-[opacity,box-shadow]", done.has(f.id) && "opacity-60", active === f.id && "ring-2 ring-primary")}>
                     <div className="flex items-start gap-3">
                       <Checkbox checked={done.has(f.id)} onCheckedChange={() => toggleDone(f.id)} aria-label={`Mark "${f.title}" as done`} className="mt-0.5" />
                       <div className="flex-1 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className={cn("text-sm font-medium", done.has(f.id) && "line-through")}>{f.title}</span>
                           <SeverityBadge s={f.severity} />
+                          {markerNo.has(f.id) ? (
+                            <button type="button" onClick={() => setActive(f.id)} className="rounded-md border border-primary/30 px-1.5 py-0.5 text-[11px] text-primary">Marked #{markerNo.get(f.id)}</button>
+                          ) : loc.status === "done" || loc.status === "failed" ? <span className="text-[11px] text-muted-foreground">Text only</span> : null}
                           <span className="text-[11px] text-muted-foreground">{DIMENSION_LABELS[f.dimension]} · {Math.round(f.confidence * 100)}% confident</span>
                         </div>
                         <p className="text-sm text-muted-foreground">{f.evidence}</p>
@@ -132,7 +144,7 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
                 ))}
               </ol>
             )}
-            <p className="mt-2 text-[11px] text-muted-foreground">Findings are general observations; image regions are described in words rather than marked, since precise locations aren’t reliably available.</p>
+            <p className="mt-2 text-[11px] text-muted-foreground">Issues are marked only when face or body points place them reliably (eyes, mouth, nose, cheeks, forehead, chin, face, hands). Everything else stays text-only.</p>
           </section>
         </div>
       </div>
