@@ -64,3 +64,13 @@ describe("comparison", () => {
     expect(compareReports([a, b], "photorealistic").verdict).toMatchObject({ kind: "winner", index: 0 });
   });
 });
+
+import { normalizeSeverity, SEVERITIES } from "./contracts";
+describe("severity scale", () => {
+  it("uses exactly low, medium, high", () => expect([...SEVERITIES].sort()).toEqual(["high", "low", "medium"]));
+  it("maps legacy levels", () => {
+    expect(normalizeSeverity("critical")).toBe("high");
+    expect(normalizeSeverity("moderate")).toBe("medium");
+    expect(normalizeSeverity("minor")).toBe("low");
+  });
+});

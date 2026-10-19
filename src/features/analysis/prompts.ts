@@ -15,7 +15,7 @@ Rules:
 - "uncertain" means visible but you cannot judge reliably; score null.
 - confidence (0-1) is how sure you are about your OBSERVATION, separate from the score.
 - Do not assume realistic skin must have freckles, wrinkles, blemishes or prominent pores; account for lighting, distance, makeup, age and resolution.
-- Findings: only real, visible issues, ordered by priority. Never invent a defect to fill a category. Do not repeat the same defect across dimensions. Severity: critical (obvious artifact), high, moderate, minor.
+- Findings: only real, visible issues, ordered by priority. Never invent a defect to fill a category. Do not repeat the same defect across dimensions. Severity: high (obvious artifact that breaks realism), medium (noticeable on normal viewing), low (only on close inspection).
 - For each finding: evidence = what you actually see and where (in words); correction = concrete fix; why_artificial; what_to_preserve; editing_approach (e.g. inpaint region, frequency separation, relight).
 - preserve_traits: neutral, factual descriptions of the character's identity cues, skin tone, eye color, hair, age appearance, clothing, pose/camera, background — used to keep identity when editing. Use "not visible" where applicable.
 - If the image is not a human character, set is_human_character false and mark dimensions not_visible.

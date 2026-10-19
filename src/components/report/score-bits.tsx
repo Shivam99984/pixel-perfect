@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { EvidenceState, Severity } from "@/features/analysis/contracts";
+import { normalizeSeverity, type EvidenceState, type Severity } from "@/features/analysis/contracts";
 
 export function scoreTone(s: number | null) {
   if (s === null) return "text-muted-foreground";
@@ -29,14 +29,14 @@ export function ScoreRing({ score, size = 132 }: { score: number | null; size?: 
 }
 
 const SEV: Record<Severity, { label: string; cls: string }> = {
-  critical: { label: "Critical", cls: "bg-bad/15 text-bad border-bad/30" },
-  high: { label: "High priority", cls: "bg-bad/10 text-bad border-bad/20" },
-  moderate: { label: "Moderate", cls: "bg-warn/10 text-warn border-warn/25" },
-  minor: { label: "Minor", cls: "bg-muted text-muted-foreground border-border" },
+  high: { label: "High", cls: "bg-bad/15 text-bad border-bad/30" },
+  medium: { label: "Medium", cls: "bg-warn/10 text-warn border-warn/25" },
+  low: { label: "Low", cls: "bg-muted text-muted-foreground border-border" },
 };
 
-export function SeverityBadge({ s }: { s: Severity }) {
-  return <span className={cn("rounded-md border px-1.5 py-0.5 text-[11px] font-medium", SEV[s].cls)}>{SEV[s].label}</span>;
+export function SeverityBadge({ s }: { s: Severity | string }) {
+  const v = SEV[normalizeSeverity(s)];
+  return <span className={cn("rounded-md border px-1.5 py-0.5 text-[11px] font-medium", v.cls)}>{v.label}</span>;
 }
 
 const EV: Record<EvidenceState, string> = {
