@@ -1,7 +1,7 @@
 import type { AnalysisGoal, CharacterAnalysisResult, ProviderOutput, Severity } from "./contracts";
 import { scoreAnalysis } from "./scoring";
 
-const SEVERITY_ORDER: Record<Severity, number> = { critical: 0, high: 1, moderate: 2, minor: 3 };
+const SEVERITY_ORDER: Record<Severity, number> = { high: 0, medium: 1, low: 2 };
 
 export function buildReport(args: {
   id: string;

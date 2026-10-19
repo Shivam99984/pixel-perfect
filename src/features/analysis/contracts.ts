@@ -17,7 +17,13 @@ export const DIMENSION_LABELS: Record<DimensionKey, string> = {
 export const EVIDENCE_STATES = ["observed", "not_observed", "not_visible", "insufficient", "uncertain"] as const;
 export type EvidenceState = (typeof EVIDENCE_STATES)[number];
 
-export const SEVERITIES = ["critical", "high", "moderate", "minor"] as const;
+export const SEVERITIES = ["high", "medium", "low"] as const;
+/** Map legacy four-level severities (saved reports) to the three-level scale. */
+export function normalizeSeverity(s: string): Severity {
+  if (s === "critical" || s === "high") return "high";
+  if (s === "moderate" || s === "medium") return "medium";
+  return "low";
+}
 export type Severity = (typeof SEVERITIES)[number];
 
 export const ANALYSIS_GOALS = {
