@@ -12,11 +12,12 @@ export function ImageViewer({ src, alt, filename, zoom: extZoom, onZoom, markers
   const setZoom = (z: number) => (onZoom ? onZoom(z) : setOwn(z));
   const [full, setFull] = useState(false);
   const clamp = (z: number) => Math.min(4, Math.max(1, Math.round(z * 4) / 4));
+  const [ratio, setRatio] = useState(0.8);
   return (
     <div className="panel overflow-hidden">
-      <div className="relative flex aspect-[4/5] items-center justify-center overflow-auto bg-muted/40">
-        <div className="relative max-h-full max-w-full origin-center transition-transform" style={{ transform: `scale(${zoom})` }}>
-          <img src={src} alt={alt} className="block max-h-[inherit] max-w-full object-contain" style={{ maxHeight: "100%" }} />
+      <div className="relative flex aspect-[4/5] items-center justify-center overflow-auto bg-muted/40" style={{ containerType: "size" }}>
+        <div className="relative origin-center transition-transform" style={{ transform: `scale(${zoom})`, aspectRatio: String(ratio), width: `min(100cqw, calc(100cqh * ${ratio}))` }}>
+          <img src={src} alt={alt} className="block size-full" onLoad={(e) => { const i = e.currentTarget; if (i.naturalWidth && i.naturalHeight) setRatio(i.naturalWidth / i.naturalHeight); }} />
           {markers?.map((m) => (
             <button
               key={m.id}
