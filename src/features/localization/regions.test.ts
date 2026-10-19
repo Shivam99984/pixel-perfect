@@ -24,3 +24,6 @@ describe("issue location", () => {
     expect(boxForRegion("hands", { faces: [], poses: [pose] })).toBeNull();
   });
 });
+describe("generic wording", () => {
+  it("doesn't mark a hair issue as the face", () => expect(resolveRegion({ title: "Overly regular hair strands", dimension: "hair", evidence: "Loose strands across the face" })).toBeNull());
+});

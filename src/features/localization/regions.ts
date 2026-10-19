@@ -20,9 +20,10 @@ const RULES: [Region, RegExp][] = [
 
 /** Decide which region a finding refers to, or null if it can't be pinned down. */
 export function resolveRegion(f: Pick<VisualFinding, "title" | "evidence" | "dimension">): Region | null {
-  for (const text of [f.title, f.evidence]) {
+  // "face" is too generic in evidence text ("strands across the face"), so it only counts in the title.
+  for (const [text, inTitle] of [[f.title, true], [f.evidence, false]] as const) {
     const t = text.toLowerCase();
-    for (const [region, re] of RULES) if (re.test(t)) return region;
+    for (const [region, re] of RULES) if ((inTitle || region !== "face") && re.test(t)) return region;
   }
   if (f.dimension === "eyes") return "eyes";
   if (f.dimension === "mouth") return "mouth";
