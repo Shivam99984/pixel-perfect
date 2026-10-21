@@ -12,7 +12,6 @@ export const COMPARISON_GOALS = {
   hair: { label: "Most realistic hair", dims: ["hair"] },
   lighting: { label: "Most realistic lighting", dims: ["lighting"] },
   coherence: { label: "Most coherent scene", dims: ["coherence"] },
-  balance: { label: "Best balance of realism and style", dims: null },
 } as const satisfies Record<string, { label: string; dims: DimensionKey[] | null }>;
 export type ComparisonGoal = keyof typeof COMPARISON_GOALS;
 
@@ -49,7 +48,6 @@ export function compareReports(reports: CharacterAnalysisResult[], goal: Compari
   if (coverageGap > MAX_COVERAGE_GAP) caveats.push("Evidence coverage differs a lot between images (e.g. different framing), which weakens the comparison.");
   const res = new Set(reports.map((r) => r.overview.resolution_quality));
   if (res.size > 1) caveats.push("The images have different effective resolution.");
-  if (goal === "balance") caveats.push("Artistic preference is yours to judge — this view only ranks photographic realism.");
 
   const goalScores = reports.map((r) => goalScore(r, goal));
   const keys = Array.from(new Set(reports.flatMap((r) => r.dimensions.map((d) => d.key))));
