@@ -100,7 +100,7 @@ function ComparePage() {
         {slots.length < 3 && <Button variant="outline" onClick={() => setSlots([...slots, { img: null, savedId: null }])} disabled={busy !== null}><Plus /> Add image C</Button>}
         {slots.length === 3 && <Button variant="ghost" onClick={() => { setSlots(slots.slice(0, 2)); setResults(null); }} disabled={busy !== null}>Remove C</Button>}
         <Select value={goal} onValueChange={(v) => setGoal(v as ComparisonGoal)}>
-          <SelectTrigger className="w-64" aria-label="Comparison goal"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-72" aria-label="Compare by"><SelectValue /></SelectTrigger>
           <SelectContent>{Object.entries(COMPARISON_GOALS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent>
         </Select>
         <Button size="lg" className="ml-auto" disabled={!ready || busy !== null} onClick={run}>{busy !== null ? `Analyzing ${TAGS[busy]}…` : "Compare"}</Button>
@@ -127,7 +127,8 @@ function ComparePage() {
                 <ImageViewer src={r.image.displayUrl} alt={`Version ${TAGS[i]}`} zoom={zoom} onZoom={setZoom} />
                 <div className="flex items-center gap-2 text-sm">
                   <span className="eyebrow">{TAGS[i]}</span>
-                  <span className={cn("font-mono text-2xl", scoreTone(cmp.goalScores[i] ?? null))}>{cmp.goalScores[i] ?? "—"}</span>
+                  <span className={cn("font-mono text-2xl", scoreTone(cmp.goalScores[i] ?? null))}>{cmp.goalScores[i] != null ? `${cmp.goalScores[i]}%` : "—"}</span>
+                  <span className="text-xs text-muted-foreground">overall {r.score.overall != null ? `${r.score.overall}%` : "—"}</span>
                   <Link to="/reports/$id" params={{ id: r.id }} className="ml-auto text-xs text-primary hover:underline">Full report →</Link>
                 </div>
               </div>
@@ -137,7 +138,7 @@ function ComparePage() {
 
           <div className="panel overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border text-left"><th className="eyebrow p-3">Dimension</th>{results.map((_, i) => <th key={i} className="eyebrow p-3 text-right">{TAGS[i]}</th>)}</tr></thead>
+              <thead><tr className="border-b border-border text-left"><th className="eyebrow p-3">Realism by part</th>{results.map((_, i) => <th key={i} className="eyebrow p-3 text-right">{TAGS[i]}</th>)}</tr></thead>
               <tbody>
                 {cmp.perDimension.map((d) => {
                   const nums = d.scores.filter((s): s is number => s !== null);
@@ -145,7 +146,9 @@ function ComparePage() {
                   return (
                     <tr key={d.key} className="border-b border-border last:border-0">
                       <td className="p-3">{DIMENSION_LABELS[d.key]}</td>
-                      {d.scores.map((s, i) => <td key={i} className={cn("p-3 text-right font-mono", scoreTone(s), s !== null && s === best && "font-semibold")}>{s ?? "n/a"}</td>)}
+                      {d.scores.map((s, i) => <td key={i} className={cn("p-3 text-right font-mono", scoreTone(s), s !== null && s === best && "font-semibold")}>{s === null ? "n/a" : (
+                        <div className="ml-auto flex w-28 items-center justify-end gap-2"><div className="h-1.5 flex-1 rounded bg-muted"><div className="h-full rounded bg-primary" style={{ width: `${s}%` }} /></div><span>{s}%</span></div>
+                      )}</td>)}
                     </tr>
                   );
                 })}
