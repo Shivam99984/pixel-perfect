@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { ChevronDown, Copy, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { buildFindingPrompt } from "@/features/improvements/build-prompt";
+import { COMPARISON_GOALS, goalScore, type ComparisonGoal } from "@/features/comparison/compare";
 import { QualityPanel } from "./quality-panel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ANALYSIS_GOALS, DIMENSION_LABELS, type CharacterAnalysisResult } from "@/features/analysis/contracts";
+import { DIMENSION_LABELS, type CharacterAnalysisResult } from "@/features/analysis/contracts";
 import { getDone, setDone } from "@/features/analysis/report-store";
 import { cn } from "@/lib/utils";
 import { ImageViewer, type ImageMarker } from "./image-viewer";
@@ -75,8 +76,24 @@ export function ReportView({ report }: { report: CharacterAnalysisResult }) {
               </div>
             )}
             <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-              Heuristic score for “{ANALYSIS_GOALS[report.goal]}”. Not calibrated against human ratings and not evidence that the character is or isn’t a real person.
+              Heuristic full-scan score. Not calibrated against human ratings and not evidence that the character is or isn’t a real person.
             </p>
+          </section>
+
+          <section aria-labelledby="goals-h" className="panel p-5">
+            <h2 id="goals-h" className="eyebrow mb-3">Realism by category</h2>
+            <ul className="space-y-2 text-sm">
+              {(Object.keys(COMPARISON_GOALS) as ComparisonGoal[]).map((g) => {
+                const v = goalScore(report, g);
+                return (
+                  <li key={g} className="flex items-center gap-3">
+                    <span className="flex-1">{COMPARISON_GOALS[g].label}</span>
+                    <div className="h-1.5 w-24 rounded bg-muted">{v !== null && <div className="h-full rounded bg-primary" style={{ width: `${v}%` }} />}</div>
+                    <span className={cn("w-12 text-right font-mono", scoreTone(v))}>{v !== null ? `${v}%` : "n/a"}</span>
+                  </li>
+                );
+              })}
+            </ul>
           </section>
 
           {report.quality && <QualityPanel q={report.quality} />}

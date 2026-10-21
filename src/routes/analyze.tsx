@@ -4,10 +4,8 @@ import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageDropzone } from "@/components/image-dropzone";
 import { AnalysisProgress } from "@/components/analysis-progress";
-import { ANALYSIS_GOALS, type AnalysisGoal } from "@/features/analysis/contracts";
 import { AnalysisFailure, runAnalysis } from "@/features/analysis/run-analysis";
 import { saveReport } from "@/features/analysis/report-store";
 import type { PreparedImage } from "@/features/upload/prepare-image";
@@ -28,8 +26,7 @@ function AnalyzePage() {
   const navigate = useNavigate();
   const [img, setImg] = useState<PreparedImage | null>(null);
   const [label, setLabel] = useState("");
-  const [goal, setGoal] = useState<AnalysisGoal>("max_photorealism");
-  const [busy, setBusy] = useState(false);
+    const [busy, setBusy] = useState(false);
   const [error, setError] = useState<AnalysisFailure | null>(null);
   const cancelled = useRef(false);
 
@@ -39,7 +36,7 @@ function AnalyzePage() {
     setError(null);
     cancelled.current = false;
     try {
-      const report = await runAnalysis(img, goal, label);
+      const report = await runAnalysis(img, "max_photorealism", label);
       if (cancelled.current) return;
       try {
         saveReport(report);
@@ -66,13 +63,6 @@ function AnalyzePage() {
           <div className="space-y-1.5">
             <label htmlFor="label" className="eyebrow">Character label (optional)</label>
             <Input id="label" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} placeholder="e.g. Mara v3" disabled={busy} />
-          </div>
-          <div className="space-y-1.5">
-            <span className="eyebrow">Analysis goal</span>
-            <Select value={goal} onValueChange={(v) => setGoal(v as AnalysisGoal)} disabled={busy}>
-              <SelectTrigger aria-label="Analysis goal"><SelectValue /></SelectTrigger>
-              <SelectContent>{Object.entries(ANALYSIS_GOALS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
-            </Select>
           </div>
           <div className="flex gap-2">
             <Button size="lg" className="flex-1" disabled={!img || busy} onClick={start}>{busy ? "Analyzing…" : "Analyze realism"}</Button>
