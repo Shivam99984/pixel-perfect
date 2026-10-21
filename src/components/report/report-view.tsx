@@ -6,7 +6,7 @@ import { COMPARISON_GOALS, goalScore, type ComparisonGoal } from "@/features/com
 import { QualityPanel } from "./quality-panel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ANALYSIS_GOALS, DIMENSION_LABELS, type CharacterAnalysisResult } from "@/features/analysis/contracts";
+import { DIMENSION_LABELS, type CharacterAnalysisResult } from "@/features/analysis/contracts";
 import { getDone, setDone } from "@/features/analysis/report-store";
 import { cn } from "@/lib/utils";
 import { ImageViewer, type ImageMarker } from "./image-viewer";
