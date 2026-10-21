@@ -27,7 +27,7 @@ export interface ComparisonResult {
   perDimension: { key: DimensionKey; scores: (number | null)[] }[];
 }
 
-function goalScore(r: CharacterAnalysisResult, goal: ComparisonGoal): number | null {
+export function goalScore(r: CharacterAnalysisResult, goal: ComparisonGoal): number | null {
   const dims = COMPARISON_GOALS[goal].dims as readonly DimensionKey[] | null;
   if (!dims) return r.score.overall;
   const parts = r.score.breakdown.filter((b) => dims.includes(b.key));
