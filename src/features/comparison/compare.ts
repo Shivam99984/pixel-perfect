@@ -6,6 +6,12 @@ export const COMPARISON_GOALS = {
   facial: { label: "Best facial details", dims: ["skin", "eyes", "mouth", "hair"] },
   portrait: { label: "Best portrait photography", dims: ["skin", "eyes", "lighting", "coherence"] },
   full_body: { label: "Best full-body realism", dims: ["anatomy", "lighting", "coherence"] },
+  body: { label: "Most realistic body (anatomy & hands)", dims: ["anatomy"] },
+  eyes: { label: "Most realistic eyes", dims: ["eyes"] },
+  mouth: { label: "Most realistic mouth & teeth", dims: ["mouth"] },
+  hair: { label: "Most realistic hair", dims: ["hair"] },
+  lighting: { label: "Most realistic lighting", dims: ["lighting"] },
+  coherence: { label: "Most coherent scene", dims: ["coherence"] },
   balance: { label: "Best balance of realism and style", dims: null },
 } as const satisfies Record<string, { label: string; dims: DimensionKey[] | null }>;
 export type ComparisonGoal = keyof typeof COMPARISON_GOALS;
