@@ -11,7 +11,7 @@ import { scoreTone } from "@/components/report/score-bits";
 import { DIMENSION_LABELS, type CharacterAnalysisResult } from "@/features/analysis/contracts";
 import { listReports, saveReport } from "@/features/analysis/report-store";
 import { AnalysisFailure, runAnalysis } from "@/features/analysis/run-analysis";
-import { COMPARISON_GOALS, compareReports, sharedAndUniqueFindings, type ComparisonGoal } from "@/features/comparison/compare";
+import { COMPARISON_GOALS, compareReports, goalScore, sharedAndUniqueFindings, type ComparisonGoal } from "@/features/comparison/compare";
 import type { PreparedImage } from "@/features/upload/prepare-image";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,6 @@ type Slot = { img: PreparedImage | null; savedId: string | null };
 function ComparePage() {
   const [slots, setSlots] = useState<Slot[]>([{ img: null, savedId: null }, { img: null, savedId: null }]);
   const [saved, setSaved] = useState<CharacterAnalysisResult[]>([]);
-  const [goal, setGoal] = useState<ComparisonGoal>("photorealistic");
   const [busy, setBusy] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<CharacterAnalysisResult[] | null>(null);
@@ -64,7 +63,7 @@ function ComparePage() {
     }
   }
 
-  const cmp = results ? compareReports(results, goal) : null;
+  const cmp = results ? compareReports(results, "photorealistic") : null;
   const su = results ? sharedAndUniqueFindings(results) : null;
 
   return (
@@ -99,10 +98,6 @@ function ComparePage() {
       <div className="mt-6 flex flex-wrap items-center gap-3">
         {slots.length < 3 && <Button variant="outline" onClick={() => setSlots([...slots, { img: null, savedId: null }])} disabled={busy !== null}><Plus /> Add image C</Button>}
         {slots.length === 3 && <Button variant="ghost" onClick={() => { setSlots(slots.slice(0, 2)); setResults(null); }} disabled={busy !== null}>Remove C</Button>}
-        <Select value={goal} onValueChange={(v) => setGoal(v as ComparisonGoal)}>
-          <SelectTrigger className="w-72" aria-label="Compare by"><SelectValue /></SelectTrigger>
-          <SelectContent>{Object.entries(COMPARISON_GOALS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent>
-        </Select>
         <Button size="lg" className="ml-auto" disabled={!ready || busy !== null} onClick={run}>{busy !== null ? `Analyzing ${TAGS[busy]}…` : "Compare"}</Button>
       </div>
       {error && <p role="alert" className="mt-4 flex items-center gap-2 text-sm text-bad"><AlertCircle className="size-4" /> {error}</p>}
@@ -116,7 +111,7 @@ function ComparePage() {
               <h2 className="text-lg font-medium">
                 {cmp.verdict.kind === "winner" ? `${TAGS[cmp.verdict.index]} reads as more photorealistic (+${cmp.verdict.margin})` : "Inconclusive"}
               </h2>
-              <p className="text-sm text-muted-foreground">{cmp.verdict.kind === "inconclusive" ? cmp.verdict.reason : `For “${COMPARISON_GOALS[goal].label}”. This ranks realism only, not attractiveness or style.`}</p>
+              <p className="text-sm text-muted-foreground">{cmp.verdict.kind === "inconclusive" ? cmp.verdict.reason : "For overall photorealism. This ranks realism only, not attractiveness or style."}</p>
               {cmp.caveats.length > 0 && <ul className="mt-2 list-disc pl-4 text-xs text-warn">{cmp.caveats.map((c) => <li key={c}>{c}</li>)}</ul>}
             </div>
           </div>
@@ -154,6 +149,28 @@ function ComparePage() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          <div className="panel overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-border text-left"><th className="eyebrow p-3">Percentage by category</th>{results.map((_, i) => <th key={i} className="eyebrow p-3 text-right">{TAGS[i]}</th>)}</tr></thead>
+              <tbody>
+                {(Object.keys(COMPARISON_GOALS) as ComparisonGoal[]).map((g) => {
+                  const scores = results.map((r) => goalScore(r, g));
+                  const nums = scores.filter((s): s is number => s !== null);
+                  const best = nums.length > 1 ? Math.max(...nums) : null;
+                  return (
+                    <tr key={g} className="border-b border-border last:border-0">
+                      <td className="p-3">{COMPARISON_GOALS[g].label}</td>
+                      {scores.map((s, i) => <td key={i} className={cn("p-3 text-right font-mono", scoreTone(s), s !== null && s === best && "font-semibold")}>{s === null ? "n/a" : (
+                        <div className="ml-auto flex w-28 items-center justify-end gap-2"><div className="h-1.5 flex-1 rounded bg-muted"><div className="h-full rounded bg-primary" style={{ width: `${s}%` }} /></div><span>{s}%</span></div>
+                      )}</td>)}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p className="p-3 text-xs text-muted-foreground">n/a means the category can't be judged from that image's framing, e.g. the body in a close-up.</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
